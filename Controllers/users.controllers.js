@@ -2,7 +2,7 @@ import expressAsyncHandler from "express-async-handler";
 import User from "../Models/UserModel.js";
 import bcrypt from "bcrypt";
 import hashPassword from "../utils/hashpassword.js";
-import { jwtToken } from "../Middlewares/jwtToken.js";
+import generateToken from "../utils/generateToken.js";
 
 export const registerUser = expressAsyncHandler(async (req, res, next) => {
     const { name, email, password } = req.body;
@@ -82,7 +82,7 @@ export const LoginUser = expressAsyncHandler(async (req, res, next) => {
         }
 
         // Generate JWT token
-        const token = jwtToken(user._id, user.email);
+        const token = generateToken(user._id, user.email);
 
         // Respond with success message and token
         return res.json({
@@ -98,3 +98,41 @@ export const LoginUser = expressAsyncHandler(async (req, res, next) => {
         next(error);
     }
 });
+
+
+//fetchallUsers
+
+export const getAllUsers = expressAsyncHandler(async (req,res,next)=>{
+    const users = await User.find();
+    res.json(users);
+})
+
+
+//fetchUserById
+export const fetchUser = expressAsyncHandler(async(req,res,next)=>{
+    const {id} = req.params
+    const user = await User.findById(id)
+    if(!user){
+        return res.status(404).json({
+            message: "User not found"
+        })
+    }
+    res.json({Username: user.name})
+    });
+
+export const UpdateUser = expressAsyncHandler(async(req,res,next)=>{
+    const {id} = req.params
+    const user = await User.findById(id)
+    if(!user){
+        return res.status(404).json({
+            message: "User not found"
+        })
+    }
+    user.name = req.body.name || user.name;
+    user.email = req.body.email || user.email;
+    user.role = req.body.role || user.role;
+    const updatedUser = await user.save();
+    res.json({
+        message: "User updated successfully",
+        Username: updatedUser.name})
+})

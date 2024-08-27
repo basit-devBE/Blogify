@@ -5,7 +5,8 @@ const Schema = mongoose.Schema;
 const BlogSchema = new Schema({
     title:{
         type: String,
-        required: true
+        required: true,
+        unique: true
     },
     content:{
         type: String,
@@ -13,10 +14,19 @@ const BlogSchema = new Schema({
     },
     User:{
         type: Schema.Types.ObjectId,
-        ref : 'User'   
+        ref : 'User',
+        required: true
     },
-    Likes:[],
-    comments:[]
+    Likes: [{ type: Schema.Types.ObjectId, ref: 'User' }],
+    comments: [{
+        user: { type: Schema.Types.ObjectId, ref: 'User' },
+        text: String,
+        date: { type: Date, default: Date.now }
+    }]    
 },
 {timestamps: true}
 )
+
+
+const Blog = mongoose.model('Blog' ,BlogSchema)
+export default Blog

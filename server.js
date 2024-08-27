@@ -3,7 +3,7 @@ import { configDotenv } from 'dotenv'
 import dbConfig from './config/dbConfig.js'
 import globalErrorHandler from './Middlewares/globalerrorhandler.js'
 import userRoutes from './Routes/users.js'
-import { LoggedIn } from './Middlewares/isLoggedIn.js'
+import BlogRouter from './Routes/blogRoutes.js'
 configDotenv()
 
 const app = express()
@@ -14,6 +14,7 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 dbConfig();
 app.use(userRoutes)
+app.use(BlogRouter)
 
 
 app.use(globalErrorHandler)
