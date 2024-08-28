@@ -2,8 +2,7 @@ import expressAsyncHandler from "express-async-handler";
 import Blog from "../Models/BlogModel.js";
 
 export const createBlog = expressAsyncHandler(async (req, res, next) => {
-    const { title, content} = req.body;
-
+    const { title, content } = req.body;
 
     if (!title || !content) {
         return res.json({
@@ -11,13 +10,12 @@ export const createBlog = expressAsyncHandler(async (req, res, next) => {
         });
     }
 
-    const BlogExists = await Blog.find(title)
+    const BlogExists = await Blog.findOne({ title });
     if (BlogExists) {
         return res.json({
-            msg:"A similar Blog already exists"
+            msg: "A similar Blog already exists"
         });
     }
-            
 
     try {
         const blog = await Blog.create({
@@ -36,8 +34,8 @@ export const createBlog = expressAsyncHandler(async (req, res, next) => {
     }
 });
 
-export const fetchblogPost = expressAsyncHandler(async(req, res, next) => {
-    const { id } = req.params; // corrected destructuring
+export const fetchblogPost = expressAsyncHandler(async (req, res, next) => {
+    const { id } = req.params;
 
     const blog = await Blog.findById(id);
     if (!blog) {
@@ -45,8 +43,47 @@ export const fetchblogPost = expressAsyncHandler(async(req, res, next) => {
     }
     res.json({
         msg: "Blog found successfully",
-        blog,
-        user:{
-        }
+        blog
     });
+});
+
+export const UpdateBlog = expressAsyncHandler(async (req, res, next) => {
+    const { id } = req.params;
+
+    const BlogFound = await Blog.findById(id);
+
+    if (!BlogFound) {
+        return res.json({
+            msg: "The blog you requested for cannot be found"
+        });
+    }
+
+    try {
+        const { title, content } = req.body;
+        const UpdatedBlog = await Blog.findByIdAndUpdate(
+            id,
+            { title, content },
+            { new: true } // returns the updated document
+        );
+
+        res.json({
+            msg: "Blog updated successfully",
+            blog: UpdatedBlog
+        });
+    } catch (error) {
+        next(error);
+    }
+});
+
+// Fetch all Blog Posts
+export const fetchAllBlogPosts = expressAsyncHandler(async (req, res, next) => {
+    try {
+        const blogs = await Blog.find({});
+        res.json({
+            msg: "All blogs fetched successfully",
+            blogs
+        });
+    } catch (error) {
+        next(error);
+    }
 });
